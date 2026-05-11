@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const authMiddleware = require('../middleware/auth');
 const {
     getMatchup,
     getMatchupById,
@@ -8,10 +9,10 @@ const {
     deleteMatchup
 } = require('../controllers/matchup');
 
-router.get('/', getMatchup);
-router.get('/:id', getMatchupById);
-router.post('/', createMatchup);
-router.put('/:id', updateMatchup);
-router.delete('/:id', deleteMatchup);
+router.get('/', authMiddleware, getMatchup);
+router.get('/:id', authMiddleware, getMatchupById);
+router.post('/', authMiddleware, createMatchup);
+router.put('/:id', authMiddleware, updateMatchup);
+router.delete('/:id', authMiddleware, deleteMatchup);
 
 module.exports = router;

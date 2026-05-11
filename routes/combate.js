@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const authMiddleware = require('../middleware/auth');
 const {
     getCombate,
     getCombateById,
@@ -8,10 +9,10 @@ const {
     deleteCombate
 } = require('../controllers/combate');
 
-router.get('/', getCombate);
-router.get('/:id', getCombateById);
-router.post('/', createCombate);
-router.put('/:id', updateCombate);
-router.delete('/:id', deleteCombate);
+router.get('/', authMiddleware, getCombate);
+router.get('/:id', authMiddleware, getCombateById);
+router.post('/', authMiddleware, createCombate);
+router.put('/:id', authMiddleware, updateCombate);
+router.delete('/:id', authMiddleware, deleteCombate);
 
 module.exports = router;

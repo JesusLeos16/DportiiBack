@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const authMiddleware = require('../middleware/auth');
 const {
     getPeleador,
     getPeleadorById,
@@ -8,10 +9,10 @@ const {
     deletePeleador
 } = require('../controllers/peleador');
 
-router.get('/', getPeleador);
-router.get('/:id', getPeleadorById);
-router.post('/', createPeleador);
-router.put('/:id', updatePeleador);
-router.delete('/:id', deletePeleador);
+router.get('/', authMiddleware, getPeleador);
+router.get('/:id', authMiddleware, getPeleadorById);
+router.post('/', authMiddleware, createPeleador);
+router.put('/:id', authMiddleware, updatePeleador);
+router.delete('/:id', authMiddleware, deletePeleador);
 
 module.exports = router;
