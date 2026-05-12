@@ -2,7 +2,8 @@ const db = require("../config/db");
 
 const getAcademia = async (req, res) => {
   try {
-    const [rows] = await db.query("SELECT * FROM academia");
+    const idUsuario = req.user.id;
+    const [rows] = await db.query("SELECT * FROM academia WHERE idUsuario = ?", [idUsuario]);
     res.json(rows);
   } catch (error) {
     console.error("Error al obtener academia", error);
@@ -12,10 +13,11 @@ const getAcademia = async (req, res) => {
 
 const getAcademiaById = async (req, res) => {
   try {
+    const idUsuario = req.user.id;
     const id = parseInt(req.params.id);
     const [rows] = await db.query(
-      "SELECT * FROM academia WHERE idAcademia = ?",
-      [id],
+      "SELECT * FROM academia WHERE idAcademia = ? AND idUsuario = ?",
+      [id, idUsuario],
     );
     if (rows.length === 0) {
       return res.status(404).json({ error: "Academia no encontrada" });
@@ -29,6 +31,7 @@ const getAcademiaById = async (req, res) => {
 
 const createAcademia = async (req, res) => {
   try {
+    const idUsuario = req.user.id;
     const { nombre, entrenador, direccion, telefono } = req.body;
     if (!nombre || !entrenador || !direccion || !telefono) {
       return res
@@ -36,8 +39,8 @@ const createAcademia = async (req, res) => {
         .json({ error: "Todos los campos son obligatorios" });
     }
     const [result] = await db.query(
-      "INSERT INTO academia (nombre, entrenador, direccion, telefono) VALUES (?, ?, ?, ?)",
-      [nombre, entrenador, direccion, telefono],
+      "INSERT INTO academia (nombre, entrenador, direccion, telefono, idUsuario) VALUES (?, ?, ?, ?, ?)",
+      [nombre, entrenador, direccion, telefono, idUsuario],
     );
     const [newAcademia] = await db.query(
       "SELECT * FROM academia WHERE idAcademia = ?",
@@ -52,6 +55,7 @@ const createAcademia = async (req, res) => {
 
 const updateAcademia = async (req, res) => {
   try {
+    const idUsuario = req.user.id;
     const id = parseInt(req.params.id);
     const { nombre, entrenador, direccion, telefono } = req.body;
     if (!nombre || !entrenador || !direccion || !telefono) {
@@ -60,19 +64,19 @@ const updateAcademia = async (req, res) => {
         .json({ error: "Todos los campos son obligatorios" });
     }
     const [existing] = await db.query(
-      "SELECT * FROM academia WHERE idAcademia = ?",
-      [id],
+      "SELECT * FROM academia WHERE idAcademia = ? AND idUsuario = ?",
+      [id, idUsuario],
     );
     if (existing.length === 0) {
       return res.status(404).json({ error: "Academia no encontrada" });
     }
     await db.query(
-      "UPDATE academia SET nombre = ?, entrenador = ?, direccion = ?, telefono = ? WHERE idAcademia = ?",
-      [nombre, entrenador, direccion, telefono, id],
+      "UPDATE academia SET nombre = ?, entrenador = ?, direccion = ?, telefono = ? WHERE idAcademia = ? AND idUsuario = ?",
+      [nombre, entrenador, direccion, telefono, id, idUsuario],
     );
     const [academiaActualizada] = await db.query(
-      "SELECT * FROM academia WHERE idAcademia = ?",
-      [id],
+      "SELECT * FROM academia WHERE idAcademia = ? AND idUsuario = ?",
+      [id, idUsuario],
     );
     res.json({
       message: "Academia actualizada",
@@ -86,10 +90,11 @@ const updateAcademia = async (req, res) => {
 
 const deleteAcademia = async (req, res) => {
   try {
+    const idUsuario = req.user.id;
     const id = parseInt(req.params.id);
     const [existing] = await db.query(
-      "SELECT * FROM academia WHERE idAcademia = ?",
-      [id],
+      "SELECT * FROM academia WHERE idAcademia = ? AND idUsuario = ?",
+      [id, idUsuario],
     );
 
     if (existing.length === 0) {
@@ -97,7 +102,7 @@ const deleteAcademia = async (req, res) => {
         error: "Academia no encontrada",
       });
     }
-    await db.query("DELETE FROM academia WHERE idAcademia = ?", [id]);
+    await db.query("DELETE FROM academia WHERE idAcademia = ? AND idUsuario = ?", [id, idUsuario]);
     res.json({
       message: "Academia eliminada",
       academia: existing[0],

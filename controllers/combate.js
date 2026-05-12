@@ -2,7 +2,8 @@ const db = require("../config/db");
 
 const getCombate = async (req, res) => {
   try {
-    const [rows] = await db.query("SELECT * FROM combate");
+    const idUsuario = req.user.id;
+    const [rows] = await db.query("SELECT * FROM combate WHERE idUsuario = ?", [idUsuario]);
     res.json(rows);
   } catch (error) {
     console.error("Error al obtener combate", error);
@@ -12,9 +13,10 @@ const getCombate = async (req, res) => {
 
 const getCombateById = async (req, res) => {
   try {
+    const idUsuario = req.user.id;
     const id = parseInt(req.params.id);
-    const [rows] = await db.query("SELECT * FROM combate WHERE idCombate = ?", [
-      id,
+    const [rows] = await db.query("SELECT * FROM combate WHERE idCombate = ? AND idUsuario = ?", [
+      id, idUsuario
     ]);
     if (rows.length === 0) {
       return res.status(404).json({ error: "Combate no encontrado" });
@@ -28,6 +30,7 @@ const getCombateById = async (req, res) => {
 
 const createCombate = async (req, res) => {
   try {
+    const idUsuario = req.user.id;
     const { idTorneo, ronda, posicion_bracket, fecha_hora, idGanador } =
       req.body;
     if (!idTorneo || !ronda) {
@@ -37,12 +40,12 @@ const createCombate = async (req, res) => {
     }
     const ganadorFinal = idGanador ? idGanador : null;
     const [result] = await db.query(
-      "INSERT INTO combate (idTorneo, idGanador, ronda, posicion_bracket, fecha_hora) VALUES (?, ?, ?, ?, ?)",
-      [idTorneo, ganadorFinal, ronda, posicion_bracket, fecha_hora],
+      "INSERT INTO combate (idTorneo, idGanador, ronda, posicion_bracket, fecha_hora, idUsuario) VALUES (?, ?, ?, ?, ?, ?)",
+      [idTorneo, ganadorFinal, ronda, posicion_bracket, fecha_hora, idUsuario],
     );
     const [nuevoCombate] = await db.query(
-      "SELECT * FROM combate WHERE idCombate = ?",
-      [result.insertId],
+      "SELECT * FROM combate WHERE idCombate = ? AND idUsuario = ?",
+      [result.insertId, idUsuario],
     );
     res.status(201).json(nuevoCombate[0]);
   } catch (error) {
@@ -60,6 +63,7 @@ const createCombate = async (req, res) => {
 
 const updateCombate = async (req, res) => {
   try {
+    const idUsuario = req.user.id;
     const id = parseInt(req.params.id);
     const { idTorneo, ronda, posicion_bracket, fecha_hora, idGanador } =
       req.body;
@@ -69,19 +73,19 @@ const updateCombate = async (req, res) => {
         .json({ error: "El idTorneo y la ronda son obligatorios" });
     }
     const [existing] = await db.query(
-      "SELECT * FROM combate WHERE idCombate = ?",
-      [id],
+      "SELECT * FROM combate WHERE idCombate = ? AND idUsuario = ?",
+      [id, idUsuario],
     );
     if (existing.length === 0) {
       return res.status(404).json({ error: "Combate no encontrado" });
     }
     await db.query(
-      "UPDATE combate SET idTorneo = ?, ronda = ?, posicion_bracket = ?, fecha_hora = ?, idGanador = ? WHERE idCombate = ?",
-      [idTorneo, ronda, posicion_bracket, fecha_hora, idGanador, id],
+      "UPDATE combate SET idTorneo = ?, ronda = ?, posicion_bracket = ?, fecha_hora = ?, idGanador = ? WHERE idCombate = ? AND idUsuario = ?",
+      [idTorneo, ronda, posicion_bracket, fecha_hora, idGanador, id, idUsuario],
     );
     const [combateActualizado] = await db.query(
-      "SELECT * FROM combate WHERE idCombate = ?",
-      [id],
+      "SELECT * FROM combate WHERE idCombate = ? AND idUsuario = ?",
+      [id, idUsuario],
     );
     res.json({
       message: "Combate actualizado",
@@ -95,10 +99,11 @@ const updateCombate = async (req, res) => {
 
 const deleteCombate = async (req, res) => {
   try {
+    const idUsuario = req.user.id;
     const id = parseInt(req.params.id);
     const [existing] = await db.query(
-      "SELECT * FROM combate WHERE idCombate = ?",
-      [id],
+      "SELECT * FROM combate WHERE idCombate = ? AND idUsuario = ?",
+      [id, idUsuario],
     );
 
     if (existing.length === 0) {
@@ -106,7 +111,7 @@ const deleteCombate = async (req, res) => {
         error: "Combate no encontrado",
       });
     }
-    await db.query("DELETE FROM combate WHERE idCombate = ?", [id]);
+    await db.query("DELETE FROM combate WHERE idCombate = ? AND idUsuario = ?", [id, idUsuario]);
     res.json({
       message: "Combate eliminado",
       combate: existing[0],

@@ -2,7 +2,8 @@ const db = require("../config/db");
 
 const getPeleador = async (req, res) => {
   try {
-    const [rows] = await db.query("SELECT * FROM peleador");
+    const idUsuario = req.user.id;
+    const [rows] = await db.query("SELECT * FROM peleador WHERE idUsuario = ?", [idUsuario]);
     res.json(rows);
   } catch (error) {
     console.error("Error al obtener peleadores", error);
@@ -12,10 +13,11 @@ const getPeleador = async (req, res) => {
 
 const getPeleadorById = async (req, res) => {
   try {
+    const idUsuario = req.user.id;
     const id = parseInt(req.params.id);
     const [rows] = await db.query(
-      "SELECT * FROM peleador WHERE idPeleador = ?",
-      [id],
+      "SELECT * FROM peleador WHERE idPeleador = ? AND idUsuario = ?",
+      [id, idUsuario],
     );
 
     if (rows.length === 0) {
@@ -30,6 +32,7 @@ const getPeleadorById = async (req, res) => {
 
 const createPeleador = async (req, res) => {
   try {
+    const idUsuario = req.user.id;
     const { nombre, apodo, peso, nivel, telefono, idAcademia } = req.body;
 
     if (!nombre || !idAcademia) {
@@ -39,8 +42,8 @@ const createPeleador = async (req, res) => {
     }
 
     const [result] = await db.query(
-      "INSERT INTO peleador (nombre, apodo, peso, nivel, telefono, idAcademia) VALUES (?, ?, ?, ?, ?, ?)",
-      [nombre, apodo, peso, nivel, telefono, idAcademia],
+      "INSERT INTO peleador (nombre, apodo, peso, nivel, telefono, idAcademia, idUsuario) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [nombre, apodo, peso, nivel, telefono, idAcademia, idUsuario],
     );
 
     const [nuevoPeleador] = await db.query(
@@ -61,6 +64,7 @@ const createPeleador = async (req, res) => {
 
 const updatePeleador = async (req, res) => {
   try {
+    const idUsuario = req.user.id;
     const id = parseInt(req.params.id);
     const { nombre, apodo, peso, nivel, telefono, idAcademia } = req.body;
 
@@ -71,21 +75,21 @@ const updatePeleador = async (req, res) => {
     }
 
     const [existing] = await db.query(
-      "SELECT * FROM peleador WHERE idPeleador = ?",
-      [id],
+      "SELECT * FROM peleador WHERE idPeleador = ? AND idUsuario = ?",
+      [id, idUsuario],
     );
     if (existing.length === 0) {
       return res.status(404).json({ error: "Peleador no encontrado" });
     }
 
     await db.query(
-      "UPDATE peleador SET nombre = ?, apodo = ?, peso = ?, nivel = ?, telefono = ?, idAcademia = ? WHERE idPeleador = ?",
-      [nombre, apodo, peso, nivel, telefono, idAcademia, id],
+      "UPDATE peleador SET nombre = ?, apodo = ?, peso = ?, nivel = ?, telefono = ?, idAcademia = ? WHERE idPeleador = ? AND idUsuario = ?",
+      [nombre, apodo, peso, nivel, telefono, idAcademia, id, idUsuario],
     );
 
     const [peleadorActualizado] = await db.query(
-      "SELECT * FROM peleador WHERE idPeleador = ?",
-      [id],
+      "SELECT * FROM peleador WHERE idPeleador = ? AND idUsuario = ?",
+      [id, idUsuario],
     );
     res.json({
       message: "Peleador actualizado",
@@ -104,17 +108,18 @@ const updatePeleador = async (req, res) => {
 
 const deletePeleador = async (req, res) => {
   try {
+    const idUsuario = req.user.id;
     const id = parseInt(req.params.id);
     const [existing] = await db.query(
-      "SELECT * FROM peleador WHERE idPeleador = ?",
-      [id],
+      "SELECT * FROM peleador WHERE idPeleador = ? AND idUsuario = ?",
+      [id, idUsuario],
     );
 
     if (existing.length === 0) {
       return res.status(404).json({ error: "Peleador no encontrado" });
     }
 
-    await db.query("DELETE FROM peleador WHERE idPeleador = ?", [id]);
+    await db.query("DELETE FROM peleador WHERE idPeleador = ? AND idUsuario = ?", [id, idUsuario]);
 
     res.json({
       message: "Peleador eliminado",

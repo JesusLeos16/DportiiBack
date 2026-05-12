@@ -2,7 +2,8 @@ const db = require("../config/db");
 
 const getTorneo = async (req, res) => {
   try {
-    const [rows] = await db.query("SELECT * FROM torneo");
+    const idUsuario = req.user.id;
+    const [rows] = await db.query("SELECT * FROM torneo WHERE idUsuario = ?", [idUsuario]);
     res.json(rows);
   } catch (error) {
     console.error("Error al obtener torneos", error);
@@ -12,9 +13,10 @@ const getTorneo = async (req, res) => {
 
 const getTorneoById = async (req, res) => {
   try {
+    const idUsuario = req.user.id;
     const id = parseInt(req.params.id);
-    const [rows] = await db.query("SELECT * FROM torneo WHERE idTorneo = ?", [
-      id,
+    const [rows] = await db.query("SELECT * FROM torneo WHERE idTorneo = ? AND idUsuario = ?", [
+      id, idUsuario
     ]);
 
     if (rows.length === 0) {
@@ -29,6 +31,7 @@ const getTorneoById = async (req, res) => {
 
 const createTorneo = async (req, res) => {
   try {
+    const idUsuario = req.user.id;
     const { nombre, fecha, competidores } = req.body;
 
     if (!nombre) {
@@ -39,8 +42,8 @@ const createTorneo = async (req, res) => {
     
 
     const [result] = await db.query(
-      "INSERT INTO torneo (nombre, fecha, competidores) VALUES (?, ?, ?)",
-      [nombre, fecha, competidores],
+      "INSERT INTO torneo (nombre, fecha, competidores, idUsuario) VALUES (?, ?, ?, ?)",
+      [nombre, fecha, competidores, idUsuario],
     );
 
     const [nuevoTorneo] = await db.query(
@@ -56,6 +59,7 @@ const createTorneo = async (req, res) => {
 
 const updateTorneo = async (req, res) => {
   try {
+    const idUsuario = req.user.id;
     const id = parseInt(req.params.id);
     const { nombre, fecha, competidores } = req.body;
 
@@ -66,21 +70,21 @@ const updateTorneo = async (req, res) => {
     }
 
     const [existing] = await db.query(
-      "SELECT * FROM torneo WHERE idTorneo = ?",
-      [id],
+      "SELECT * FROM torneo WHERE idTorneo = ? AND idUsuario = ?",
+      [id, idUsuario],
     );
     if (existing.length === 0) {
       return res.status(404).json({ error: "Torneo no encontrado" });
     }
 
     await db.query(
-      "UPDATE torneo SET nombre = ?, fecha = ?, competidores = ? WHERE idTorneo = ?",
-      [nombre, fecha, competidores, id],
+      "UPDATE torneo SET nombre = ?, fecha = ?, competidores = ? WHERE idTorneo = ? AND idUsuario = ?",
+      [nombre, fecha, competidores, id, idUsuario],
     );
 
     const [torneoActualizado] = await db.query(
-      "SELECT * FROM torneo WHERE idTorneo = ?",
-      [id],
+      "SELECT * FROM torneo WHERE idTorneo = ? AND idUsuario = ?",
+      [id, idUsuario],
     );
     res.json({
       message: "Torneo actualizado",
@@ -94,17 +98,18 @@ const updateTorneo = async (req, res) => {
 
 const deleteTorneo = async (req, res) => {
   try {
+    const idUsuario = req.user.id;
     const id = parseInt(req.params.id);
     const [existing] = await db.query(
-      "SELECT * FROM torneo WHERE idTorneo = ?",
-      [id],
+      "SELECT * FROM torneo WHERE idTorneo = ? AND idUsuario = ?",
+      [id, idUsuario],
     );
 
     if (existing.length === 0) {
       return res.status(404).json({ error: "Torneo no encontrado" });
     }
 
-    await db.query("DELETE FROM torneo WHERE idTorneo = ?", [id]);
+    await db.query("DELETE FROM torneo WHERE idTorneo = ? AND idUsuario = ?", [id, idUsuario]);
 
     res.json({
       message: "Torneo eliminado",

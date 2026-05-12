@@ -1,10 +1,12 @@
-let users = [
-  { id: 1, nombre: "Cris" },
-  { id: 2, nombre: "Juan" },
-];
-
-const getUsers = (req, res) => {
-  res.json(users);
+const getUsers = async (req, res) => {
+  try {
+    const idUsuario = req.user.id;
+    const [rows] = await db.query("SELECT * FROM users WHERE idUsuario = ?", [idUsuario]);
+    res.json(rows);
+  } catch (error) {
+    console.error("Error al obtener usuarios", error);
+    res.status(500).json({ error: "Error al obtener usuarios" });
+  }
 };
 
 const getUserById = (req, res) => {

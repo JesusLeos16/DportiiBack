@@ -2,7 +2,8 @@ const db = require("../config/db");
 
 const getMatchup = async (req, res) => {
   try {
-    const [rows] = await db.query("SELECT * FROM matchup");
+    const idUsuario = req.user.id;
+    const [rows] = await db.query("SELECT * FROM matchup WHERE idUsuario = ?", [idUsuario]);
     res.json(rows);
   } catch (error) {
     console.error("Error al obtener matchup", error);
@@ -12,9 +13,10 @@ const getMatchup = async (req, res) => {
 
 const getMatchupById = async (req, res) => {
   try {
+    const idUsuario = req.user.id;
     const id = parseInt(req.params.id);
-    const [rows] = await db.query("SELECT * FROM matchup WHERE idMatchup = ?", [
-      id,
+    const [rows] = await db.query("SELECT * FROM matchup WHERE idMatchup = ? AND idUsuario = ?", [
+      id, idUsuario
     ]);
     if (rows.length === 0) {
       return res.status(404).json({ error: "Matchup no encontrado" });
@@ -28,6 +30,8 @@ const getMatchupById = async (req, res) => {
 
 const createMatchup = async (req, res) => {
   try {
+  
+    const idUsuario = req.user.id;
     const { idPeleador, idCombate, esquina } = req.body;
 
     if (!esquina || !idCombate || !idPeleador) {
@@ -41,8 +45,8 @@ const createMatchup = async (req, res) => {
         .json({ error: "La esquina debe ser 'roja' o 'azul'" });
     }
     const [result] = await db.query(
-      "INSERT INTO matchup (idPeleador, idCombate, esquina) VALUES (?, ?, ?)",
-      [idPeleador, idCombate, esquina],
+      "INSERT INTO matchup (idPeleador, idCombate, esquina, idUsuario) VALUES (?, ?, ?, ?)",
+      [idPeleador, idCombate, esquina, idUsuario],
     );
 
     const [nuevoMatchup] = await db.query(
@@ -63,6 +67,7 @@ const createMatchup = async (req, res) => {
 
 const updateMatchup = async (req, res) => {
   try {
+    const idUsuario = req.user.id;
     const id = parseInt(req.params.id);
     const { idPeleador, idCombate, esquina } = req.body;
 
@@ -78,20 +83,20 @@ const updateMatchup = async (req, res) => {
     }
 
     const [existing] = await db.query(
-      "SELECT * FROM matchup WHERE idMatchup = ?",
-      [id],
+      "SELECT * FROM matchup WHERE idMatchup = ? AND idUsuario = ?",
+      [id, idUsuario],
     );
     if (existing.length === 0) {
       return res.status(404).json({ error: "Matchup no encontrado" });
     }
     await db.query(
-      "UPDATE matchup SET idPeleador = ?, idCombate = ?, esquina = ? WHERE idMatchup = ?",
-      [idPeleador, idCombate, esquina, id],
+      "UPDATE matchup SET idPeleador = ?, idCombate = ?, esquina = ? WHERE idMatchup = ? AND idUsuario = ?",
+      [idPeleador, idCombate, esquina, id, idUsuario],
     );
 
     const [matchupActualizado] = await db.query(
-      "SELECT * FROM matchup WHERE idMatchup = ?",
-      [id],
+      "SELECT * FROM matchup WHERE idMatchup = ? AND idUsuario = ?",
+      [id, idUsuario],
     );
     res.json({
       message: "Matchup actualizado",
@@ -105,17 +110,18 @@ const updateMatchup = async (req, res) => {
 
 const deleteMatchup = async (req, res) => {
   try {
+    const idUsuario = req.user.id;
     const id = parseInt(req.params.id);
     const [existing] = await db.query(
-      "SELECT * FROM matchup WHERE idMatchup = ?",
-      [id],
+      "SELECT * FROM matchup WHERE idMatchup = ? AND idUsuario = ?",
+      [id, idUsuario],
     );
 
     if (existing.length === 0) {
       return res.status(404).json({ error: "Matchup no encontrado" });
     }
 
-    await db.query("DELETE FROM matchup WHERE idMatchup = ?", [id]);
+    await db.query("DELETE FROM matchup WHERE idMatchup = ? AND idUsuario = ?", [id, idUsuario]);
 
     res.json({
       message: "Matchup eliminado",
