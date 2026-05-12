@@ -16,6 +16,10 @@ app.use("/torneo", torneoRoutes);
 app.use("/combate", combateRoutes);
 app.use("/peleador", peleadorRoutes);
 app.use("/matchup", matchupRoutes);
+
+app.get("/", (req, res) => {
+  res.json({ message: "Todo chido" });
+});
 const testDBConnectionAndStart = async () => {
   try {
     //   await db.query ('SELECT 1')
