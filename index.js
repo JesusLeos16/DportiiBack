@@ -6,6 +6,7 @@ const combateRoutes = require("./routes/combate");
 const torneoRoutes = require("./routes/torneo");
 const peleadorRoutes = require("./routes/peleador");
 const matchupRoutes = require("./routes/matchup");
+const inscripcionRoutes = require("./routes/inscripcion");
 const authRoutes = require("./auth");
 const db = require("./config/db");
 app.use(cors());
@@ -16,6 +17,7 @@ app.use("/torneo", torneoRoutes);
 app.use("/combate", combateRoutes);
 app.use("/peleador", peleadorRoutes);
 app.use("/matchup", matchupRoutes);
+app.use("/inscripcion", inscripcionRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "Todo chido" });

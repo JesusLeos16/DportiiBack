@@ -33,7 +33,7 @@ const getPeleadorById = async (req, res) => {
 const createPeleador = async (req, res) => {
   try {
     const idUsuario = req.user.id;
-    const { nombre, apodo, peso, nivel, telefono, idAcademia } = req.body;
+    const { nombre, apodo, peso, edad, nivel, telefono, idAcademia } = req.body;
 
     if (!nombre || !idAcademia) {
       return res
@@ -42,8 +42,8 @@ const createPeleador = async (req, res) => {
     }
 
     const [result] = await db.query(
-      "INSERT INTO peleador (nombre, apodo, peso, nivel, telefono, idAcademia, idUsuario) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [nombre, apodo, peso, nivel, telefono, idAcademia, idUsuario],
+      "INSERT INTO peleador (nombre, apodo, peso, edad, nivel, telefono, idAcademia, idUsuario) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      [nombre, apodo, peso, edad || 0, nivel, telefono, idAcademia, idUsuario],
     );
 
     const [nuevoPeleador] = await db.query(
@@ -66,7 +66,7 @@ const updatePeleador = async (req, res) => {
   try {
     const idUsuario = req.user.id;
     const id = parseInt(req.params.id);
-    const { nombre, apodo, peso, nivel, telefono, idAcademia } = req.body;
+    const { nombre, apodo, peso, edad, nivel, telefono, idAcademia } = req.body;
 
     if (!nombre || !idAcademia) {
       return res
@@ -83,8 +83,8 @@ const updatePeleador = async (req, res) => {
     }
 
     await db.query(
-      "UPDATE peleador SET nombre = ?, apodo = ?, peso = ?, nivel = ?, telefono = ?, idAcademia = ? WHERE idPeleador = ? AND idUsuario = ?",
-      [nombre, apodo, peso, nivel, telefono, idAcademia, id, idUsuario],
+      "UPDATE peleador SET nombre = ?, apodo = ?, peso = ?, edad = ?, nivel = ?, telefono = ?, idAcademia = ? WHERE idPeleador = ? AND idUsuario = ?",
+      [nombre, apodo, peso, edad || 0, nivel, telefono, idAcademia, id, idUsuario],
     );
 
     const [peleadorActualizado] = await db.query(
