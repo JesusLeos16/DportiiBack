@@ -22,6 +22,16 @@ app.use("/inscripcion", inscripcionRoutes);
 app.get("/", (req, res) => {
   res.json({ message: "Todo chido" });
 });
+
+app.get("/migrate", async (req, res) => {
+  try {
+    const query = "ALTER TABLE combate ADD COLUMN categoria VARCHAR(50) AFTER idTorneo;";
+    await db.query(query);
+    res.json({ success: true });
+  } catch (err) {
+    res.json({ error: err.message });
+  }
+});
 const testDBConnectionAndStart = async () => {
   try {
     //   await db.query ('SELECT 1')
