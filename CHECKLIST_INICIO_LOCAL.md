@@ -1,0 +1,23 @@
+# Checklist de inicio local
+
+- [ ] Cloné ambos repositorios y seleccioné `preparacion-pruebas-equipo`.
+- [ ] Instalé Node.js y Git.
+- [ ] Ejecuté `npm ci` en backend.
+- [ ] Ejecuté `npm ci` en frontend.
+- [ ] Recibí los valores de entorno por un medio seguro.
+- [ ] Recibí el certificado CA por un medio seguro.
+- [ ] Guardé el CA fuera de los repositorios.
+- [ ] Configuré `DB_CA_PATH`.
+- [ ] El propietario confirmó que Aiven está activo.
+- [ ] El backend comprobó MySQL.
+- [ ] `GET /` respondió HTTP 200.
+- [ ] Vite inició.
+- [ ] Abrí la landing.
+- [ ] Abrí el login.
+- [ ] Pude iniciar sesión con la cuenta controlada.
+- [ ] Conozco la prueba que me corresponde.
+- [ ] Tengo disponibles sus pasos, límites y criterios de aceptación.
+- [ ] Preparé una carpeta local para evidencias sin secretos.
+- [ ] Cerré sesión y limpié datos locales si usé un equipo compartido.
+- [ ] Sé detener frontend y backend con `Ctrl + C`.
+- [ ] Avisaré al propietario cuando termine.

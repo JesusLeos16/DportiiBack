@@ -1,5 +1,10 @@
 const mysql = require("mysql2/promise");
+const fs = require("fs");
 require("dotenv").config();
+
+if (!process.env.DB_CA_PATH) {
+  throw new Error("DB_CA_PATH es obligatoria para validar TLS");
+}
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
@@ -10,9 +15,9 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  //esta chachara es para el certiicado ssl
   ssl: {
-    rejectUnauthorized: false,
+    ca: fs.readFileSync(process.env.DB_CA_PATH),
+    rejectUnauthorized: true,
   },
 });
 

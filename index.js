@@ -23,33 +23,29 @@ app.get("/", (req, res) => {
   res.json({ message: "Todo chido" });
 });
 
-app.get("/migrate", async (req, res) => {
-  try {
-    const query = "ALTER TABLE combate ADD COLUMN categoria VARCHAR(50) AFTER idTorneo;";
-    await db.query(query);
-    res.json({ success: true });
-  } catch (err) {
-    res.json({ error: err.message });
-  }
+app.get("/migrate", (_req, res) => {
+  res.status(403).json({ error: "Endpoint deshabilitado" });
 });
 const testDBConnectionAndStart = async () => {
   try {
-    //   await db.query ('SELECT 1')
-    //   console.log('Ta funcionando')
-    //   app.listen(3000, () => {
-    //     console.log("Servidor corriendo en http://localhost:3000");
-    //   });
-    // } catch (error) {
-    //   console.error('tas mal con la DB',error.message)
-    //   process.exit(1)
-    // }
+    const [rows] = await db.query("SELECT 1 AS ok;");
+
+    if (rows[0]?.ok !== 1) {
+      const error = new Error("Resultado inválido en la comprobación de MySQL");
+      error.code = "DB_HEALTHCHECK_INVALID_RESULT";
+      throw error;
+    }
 
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
+      console.log("Conexión con MySQL comprobada");
       console.log(`Servidor corriendo en el puerto ${PORT}`);
     });
   } catch (error) {
-    console.error("Hay algo mal en el backend mi chavo:", error.message);
+    const errorCode = /^[A-Z0-9_]+$/.test(error?.code)
+      ? error.code
+      : "DB_HEALTHCHECK_FAILED";
+    console.error(`No se pudo comprobar la conexión con MySQL (${errorCode})`);
     process.exit(1);
   }
 };
